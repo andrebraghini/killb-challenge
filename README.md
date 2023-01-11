@@ -1,5 +1,37 @@
 # KillB Challenge
 
+## Install
+
+Make sure you have Node.js installed.
+Then run the commands below to install dependencies and run the service.
+
+```bash
+# Install dependencies
+npm install
+
+# Start service
+npm start
+```
+
+## Usage
+
+Run the command below to make one or more arbitrages.
+
+```bash
+curl --location --request POST 'http://localhost:3000/arbitrage' \
+--header 'Content-Type: application/json' \
+--data-raw '[
+    {
+        "symbol": "USD/MXN",
+        "value": 50
+    },
+    {
+        "symbol": "USDC/BRL",
+        "value": 50000
+    }
+]'
+```
+
 ## Tasks
 
 - [x] Code scaffolding
