@@ -5,6 +5,8 @@
 Make sure you have Node.js installed.
 Then run the commands below to install dependencies and run the service.
 
+Before start the service, you can change the list of exchanges to use in the `.env` file.
+
 ```bash
 # Install dependencies
 npm install
