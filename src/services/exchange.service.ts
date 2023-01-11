@@ -1,6 +1,6 @@
+import * as ccxt from 'ccxt';
 import { injectable, singleton } from 'tsyringe';
 import { environment } from '../environment';
-import * as ccxt from 'ccxt';
 import { logger } from '../logger';
 import { OrderBook } from '../use-cases/interface/best-price.interface';
 
@@ -16,6 +16,7 @@ export class ExchangeService {
 
   private instantiate_exchanges_classes() {
     environment.exchanges
+      .filter(exchange_id => ccxt.exchanges.includes(exchange_id))
       .forEach(exchange_id => {
         const exchange = new ccxt[exchange_id]();
         this.exchanges[exchange_id] = exchange;
@@ -78,6 +79,7 @@ export class ExchangeService {
       Object
         .keys(this.exchanges)
         .map(id => this.exchanges[id])
+        .filter(exchange => exchange)
         .map(exchange => this.fetch_order_books(exchange, [...symbols, ...reverse_symbols]))
     );
 
@@ -101,7 +103,7 @@ export class ExchangeService {
     symbols: string[]
   ): Promise<OrderBook[]> {
     const accepted_symbols = this.get_accepted_symbols(exchange, symbols);
-    if (!accepted_symbols.length) {
+    if (!accepted_symbols.length || !exchange) {
       return [];
     }
 
@@ -136,6 +138,10 @@ export class ExchangeService {
    * @returns Accepted symbols
    */
   private get_accepted_symbols(exchange: ccxt.Exchange, symbols: string[]): string[] {
+    if (!exchange) {
+      return [];
+    }
+
     return symbols.filter(symbol => exchange.symbols.includes(symbol));
   }
 
@@ -151,6 +157,10 @@ export class ExchangeService {
       .keys(this.exchanges)
       .forEach(id => {
         const exchange = this.exchanges[id];
+        if (!exchange) {
+          return;
+        }
+
         const [source_currency, target_currency] = symbol.split('/');
         result[id] = [
           exchange.currencies[source_currency].precision,
@@ -182,6 +192,8 @@ export class ExchangeService {
   }
 
   get_exchanges_ids(): string[] {
-    return Object.keys(this.exchanges);
+    return Object
+      .keys(this.exchanges)
+      .filter(id => this.exchanges[id]);
   }
 }
